@@ -223,7 +223,7 @@ const Gesture: React.FC = () => {
         width={videoWidth}
         height={videoHeight}
         autoPlay={isPlaying}
-      d/>
+      />
 
       <canvas id="output_canvas" className="z-10" />
       <div id="gesture_output" />
