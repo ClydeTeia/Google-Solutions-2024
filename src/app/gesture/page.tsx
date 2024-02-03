@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
 
 import {
@@ -43,12 +43,13 @@ const Gesture: React.FC = () => {
         runningMode: runningMode,
         numHands: 1,
       });
-
+      5;
       setGestureRecognizer(recognizer);
     };
     console.log("createGestureRecognizer");
 
     createGestureRecognizer();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   let lastVideoTime = -1;
@@ -63,93 +64,99 @@ const Gesture: React.FC = () => {
 
     if (webcamRef.current) {
       const videoElement = webcamRef.current.video;
+      if (gestureRecognizer) {
+        if (videoElement) {
+          if (runningMode === "IMAGE") {
+            setRunningMode("VIDEO");
+            await gestureRecognizer.setOptions({ runningMode: "VIDEO" });
+          }
+          const animate = async () => {
+            const nowInMs = Date.now();
 
-      if (videoElement) {
-        if (runningMode === "IMAGE") {
-          setRunningMode("VIDEO");
-          await gestureRecognizer?.setOptions({ runningMode: "VIDEO" });
-        }
-        const animate = async () => {
-          const nowInMs = Date.now();
+            if (videoElement.currentTime !== lastVideoTime) {
+              lastVideoTime = videoElement.currentTime;
+              webcamResults = gestureRecognizer.recognizeForVideo(
+                videoElement,
+                nowInMs
+              );
+            }
 
-          if (videoElement.currentTime !== lastVideoTime) {
-            lastVideoTime = videoElement.currentTime;
-            webcamResults = gestureRecognizer?.recognizeForVideo(
-              videoElement,
-              nowInMs
+            const canvasElement = document.getElementById(
+              "output_canvas"
+            ) as HTMLCanvasElement;
+            const canvasCtx = canvasElement.getContext(
+              "2d"
+            ) as CanvasRenderingContext2D;
+            const gestureOutput = document.getElementById(
+              "gesture_output"
+            ) as HTMLElement;
+
+            canvasCtx.save();
+            canvasCtx.clearRect(
+              0,
+              0,
+              canvasElement.width,
+              canvasElement.height
             );
-          }
 
-          const canvasElement = document.getElementById(
-            "output_canvas"
-          ) as HTMLCanvasElement;
-          const canvasCtx = canvasElement.getContext(
-            "2d"
-          ) as CanvasRenderingContext2D;
-          const gestureOutput = document.getElementById(
-            "gesture_output"
-          ) as HTMLElement;
+            const drawingUtils = new DrawingUtils(canvasCtx);
 
-          canvasCtx.save();
-          canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-          const drawingUtils = new DrawingUtils(canvasCtx);
-
-          canvasElement.style.height = videoHeight;
-          videoElement.style.width = videoWidth;
-          videoElement.style.height = videoHeight;
-          canvasElement.style.width = videoWidth;
-          if (webcamResults) {
-            if (
-              webcamResults?.landmarks &&
-              webcamResults.gestures?.length > 0
-            ) {
-              for (const landmarks of webcamResults.landmarks) {
-                drawingUtils.drawConnectors(
-                  landmarks,
-                  GestureRecognizer.HAND_CONNECTIONS,
-                  {
-                    color: "#00FF00",
-                    lineWidth: 5,
-                  }
-                );
-                drawingUtils.drawLandmarks(landmarks, {
-                  color: "#FF0000",
-                  lineWidth: 2,
-                });
-              }
-            }
-
-            canvasCtx.restore();
-
-            if (webcamResults.gestures) {
+            canvasElement.style.height = videoHeight;
+            videoElement.style.width = videoWidth;
+            videoElement.style.height = videoHeight;
+            canvasElement.style.width = videoWidth;
+            if (webcamResults) {
               if (
-                webcamResults.gestures.length > 0 &&
-                webcamResults.handedness.length > 0
+                webcamResults.landmarks &&
+                webcamResults.gestures.length > 0
               ) {
-                gestureOutput.style.display = "block";
-                gestureOutput.style.width = videoWidth;
+                for (const landmarks of webcamResults.landmarks) {
+                  drawingUtils.drawConnectors(
+                    landmarks,
+                    GestureRecognizer.HAND_CONNECTIONS,
+                    {
+                      color: "#00FF00",
+                      lineWidth: 5,
+                    }
+                  );
+                  drawingUtils.drawLandmarks(landmarks, {
+                    color: "#FF0000",
+                    lineWidth: 2,
+                  });
+                }
+              }
 
-                const categoryName =
-                  webcamResults.gestures[0][0]?.categoryName || "Unknown";
-                const categoryScore = Number(
-                  webcamResults.gestures[0][0]?.score * 100 || 0
-                ).toFixed(2);
-                const handedness =
-                  webcamResults.handedness[0][0]?.displayName || "Unknown";
+              canvasCtx.restore();
 
-                gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore} %\n Handedness: ${handedness}`;
-              } else {
-                gestureOutput.style.display = "none";
+              if (webcamResults.gestures) {
+                if (
+                  webcamResults.gestures.length > 0 &&
+                  webcamResults.handedness.length > 0
+                ) {
+                  gestureOutput.style.display = "block";
+                  gestureOutput.style.width = videoWidth;
+
+                  const categoryName =
+                    webcamResults.gestures[0][0]?.categoryName || "Unknown";
+                  const categoryScore = Number(
+                    webcamResults.gestures[0][0]?.score * 100 || 0
+                  ).toFixed(2);
+                  const handedness =
+                    webcamResults.handedness[0][0]?.displayName || "Unknown";
+
+                  gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore} %\n Handedness: ${handedness}`;
+                } else {
+                  gestureOutput.style.display = "none";
+                }
               }
             }
-          }
 
-          if (webcamRunning) {
-            animationFrameId = requestAnimationFrame(animate);
-          }
-        };
-        animationFrameId = requestAnimationFrame(animate);
+            if (webcamRunning) {
+              animationFrameId = requestAnimationFrame(animate);
+            }
+          };
+          animationFrameId = requestAnimationFrame(animate);
+        }
       }
     }
   };
@@ -216,7 +223,7 @@ const Gesture: React.FC = () => {
         width={videoWidth}
         height={videoHeight}
         autoPlay={isPlaying}
-      />
+      d/>
 
       <canvas id="output_canvas" className="z-10" />
       <div id="gesture_output" />
