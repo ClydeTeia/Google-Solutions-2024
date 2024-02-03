@@ -1,0 +1,3 @@
+gcloud storage buckets update gs://visionx_gesture_recognizer --cors-file=gcloud-cors.json
+
+to change the cors of gcloud, needed to make the fetching of the model work.
