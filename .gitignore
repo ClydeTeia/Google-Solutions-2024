@@ -6,6 +6,9 @@
 .pnp.js
 .yarn/install-state.gz
 
+#custom files
+.gloud-cors.json
+
 # testing
 /coverage
 
@@ -34,3 +37,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+gcloud-cors.json

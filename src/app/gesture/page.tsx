@@ -37,10 +37,11 @@ const Gesture: React.FC = () => {
       const recognizer = await GestureRecognizer.createFromOptions(vision, {
         baseOptions: {
           modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
+            "https://storage.googleapis.com/visionx_gesture_recognizer/gesture_recognizer_better.task",
           delegate: "GPU",
         },
         runningMode: runningMode,
+        numHands: 1,
       });
 
       setGestureRecognizer(recognizer);
@@ -48,7 +49,7 @@ const Gesture: React.FC = () => {
     console.log("createGestureRecognizer");
 
     createGestureRecognizer();
-  }, [runningMode]);
+  }, []);
 
   let lastVideoTime = -1;
   let webcamResults: any = undefined;
@@ -98,44 +99,50 @@ const Gesture: React.FC = () => {
           videoElement.style.width = videoWidth;
           videoElement.style.height = videoHeight;
           canvasElement.style.width = videoWidth;
-
-          if (webcamResults?.landmarks && webcamResults.gestures?.length > 0) {
-            for (const landmarks of webcamResults.landmarks) {
-              drawingUtils.drawConnectors(
-                landmarks,
-                GestureRecognizer.HAND_CONNECTIONS,
-                {
-                  color: "#00FF00",
-                  lineWidth: 5,
-                }
-              );
-              drawingUtils.drawLandmarks(landmarks, {
-                color: "#FF0000",
-                lineWidth: 2,
-              });
+          if (webcamResults) {
+            if (
+              webcamResults?.landmarks &&
+              webcamResults.gestures?.length > 0
+            ) {
+              for (const landmarks of webcamResults.landmarks) {
+                drawingUtils.drawConnectors(
+                  landmarks,
+                  GestureRecognizer.HAND_CONNECTIONS,
+                  {
+                    color: "#00FF00",
+                    lineWidth: 5,
+                  }
+                );
+                drawingUtils.drawLandmarks(landmarks, {
+                  color: "#FF0000",
+                  lineWidth: 2,
+                });
+              }
             }
-          }
 
-          canvasCtx.restore();
+            canvasCtx.restore();
 
-          if (
-            webcamResults?.gestures?.length > 0 &&
-            webcamResults.handedness?.length > 0
-          ) {
-            gestureOutput.style.display = "block";
-            gestureOutput.style.width = videoWidth;
+            if (webcamResults.gestures) {
+              if (
+                webcamResults.gestures.length > 0 &&
+                webcamResults.handedness.length > 0
+              ) {
+                gestureOutput.style.display = "block";
+                gestureOutput.style.width = videoWidth;
 
-            const categoryName =
-              webcamResults.gestures[0][0]?.categoryName || "Unknown";
-            const categoryScore = Number(
-              webcamResults.gestures[0][0]?.score * 100 || 0
-            ).toFixed(2);
-            const handedness =
-              webcamResults.handedness[0][0]?.displayName || "Unknown";
+                const categoryName =
+                  webcamResults.gestures[0][0]?.categoryName || "Unknown";
+                const categoryScore = Number(
+                  webcamResults.gestures[0][0]?.score * 100 || 0
+                ).toFixed(2);
+                const handedness =
+                  webcamResults.handedness[0][0]?.displayName || "Unknown";
 
-            gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore} %\n Handedness: ${handedness}`;
-          } else {
-            gestureOutput.style.display = "none";
+                gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore} %\n Handedness: ${handedness}`;
+              } else {
+                gestureOutput.style.display = "none";
+              }
+            }
           }
 
           if (webcamRunning) {
