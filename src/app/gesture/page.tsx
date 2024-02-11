@@ -246,6 +246,7 @@ const Gesture: React.FC = () => {
     recognize();
     console.log(i + 1);
     i++;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recognizedLetter, textChallenge, categoryNameState, categoryScoreState]);
 
   return (
