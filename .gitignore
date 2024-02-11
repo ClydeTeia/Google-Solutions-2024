@@ -9,6 +9,9 @@
 #custom files
 .gloud-cors.json
 
+#firebase
+/visionx-413000-firebase-adminsdk-aus09-8606f823c1.json
+
 # testing
 /coverage
 
@@ -38,3 +41,4 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 gcloud-cors.json
+.env
