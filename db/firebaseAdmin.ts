@@ -13,11 +13,9 @@ function formatPrivateKey(key: string) {
 }
 
 export function createFirebaseAdminApp(params: FirebaseAdminAppParams) {
-  if (params.privateKey === undefined) {
-    return;
-  }
-  
-  const privateKey = formatPrivateKey(params.privateKey);
+  const privateKey = params.privateKey
+    ? formatPrivateKey(params.privateKey)
+    : undefined;
 
   if (admin.apps.length > 0) {
     return admin.app();
