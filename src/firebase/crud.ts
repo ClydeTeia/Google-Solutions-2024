@@ -32,7 +32,7 @@ export async function readData(table: string, name: string, value: unknown) {
   }
 }
 
-export async function updateData(table: string, name: string, value: unknown, newData: Record<string, unknown>) {
+export async function updateData(table: string, name: string, value: unknown, newData: Record<string,Partial<unknown> | undefined>) {
   try {
     const q = query(collection(db, table), where(name, "==", value));
     const querySnapshot = await getDocs(q);
