@@ -16,9 +16,9 @@ export default async function Home() {
 
   // await readData("code", "name", "hi");
 
-  await updateData("code","name","hi",{
-    "ssk": "11233"
-  })
+  // await updateData("code","name","hi",{
+  //   "ssk": "11233"
+  // })
 
   // await deleteData("code","new","222")
 
