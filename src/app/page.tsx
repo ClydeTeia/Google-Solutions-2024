@@ -5,8 +5,10 @@ import {
   updateData,
   deleteData
 } from "@/firebase/crud";
+import { auth } from "@/firebase/config";
+import { onAuthStateChanged } from "firebase/auth";
 
-export default async function Home() {
+export default function Home() {
   // CRUD TESTS
 
   // await createData("code", {
@@ -21,19 +23,26 @@ export default async function Home() {
   // })
 
   // await deleteData("code","new","222")
+  // const router = useRouter();
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // User is signed in, see docs for a list of available properties
+      // https://firebase.google.com/docs/reference/js/auth.user
+      const uid = user.uid;
+      console.log("hello", user.displayName)
+    } else {
+      // router.push("/authentication")
+      console.log("no user")
+    }
+  });
 
   return (
     <main className="p-2">
       <h1>Home Page</h1>
-      {/* <Image src={logo} alt={"logo"} width={100} height={24} priority></Image> */}
       <div></div>
       <div>
-        {/* {links?.map((link) => (
-          <a href={link.url} key={link.title}>
-            <h2 className="text-3xl">{link.title}</h2>
-            <p>{link.desc}</p>
-          </a>
-        ))} */}
+
       </div>
     </main>
   );
