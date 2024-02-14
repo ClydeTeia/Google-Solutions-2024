@@ -24,7 +24,15 @@ const Gesture: React.FC = () => {
     useState<GestureRecognizer | null>(null);
   const [runningMode, setRunningMode] = useState<RunningMode>("VIDEO");
   const [webcamRunning, setWebcamRunning] = useState<boolean>(false);
+  const [categoryNameState, setCategoryNameState] = useState<string>("");
+  const [categoryScoreState, setCategoryScoreState] = useState<number>();
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [recognizedLetter, setRecognizedLetter] = useState<string>("");
+  const [recognizedText, setRecognizedText] = useState<string>("");
+  const [textChallenge, setTextChallenge] = useState<string>(
+    "She sell seashells on the sea shore"
+  );
 
   let animationFrameId: number;
 
@@ -58,10 +66,6 @@ const Gesture: React.FC = () => {
   // console.log("before predictWebcam");
 
   const PredictWebcam = async () => {
-    let i = 0;
-
-    console.log((i += 1) + " hi");
-
     if (webcamRef.current) {
       const videoElement = webcamRef.current.video;
       if (gestureRecognizer) {
@@ -81,54 +85,54 @@ const Gesture: React.FC = () => {
               );
             }
 
-            const canvasElement = document.getElementById(
-              "output_canvas"
-            ) as HTMLCanvasElement;
-            const canvasCtx = canvasElement.getContext(
-              "2d"
-            ) as CanvasRenderingContext2D;
+            // const canvasElement = document.getElementById(
+            //   "output_canvas"
+            // ) as HTMLCanvasElement;
+            // const canvasCtx = canvasElement.getContext(
+            //   "2d"
+            // ) as CanvasRenderingContext2D;
             const gestureOutput = document.getElementById(
               "gesture_output"
             ) as HTMLElement;
 
-            canvasCtx.save();
-            canvasCtx.clearRect(
-              0,
-              0,
-              canvasElement.width,
-              canvasElement.height
-            );
+            // canvasCtx.save();
+            // canvasCtx.clearRect(
+            //   0,
+            //   0,
+            //   canvasElement.width,
+            //   canvasElement.height
+            // );
 
-            const drawingUtils = new DrawingUtils(canvasCtx);
+            // const drawingUtils = new DrawingUtils(canvasCtx);
 
-            canvasElement.style.height = videoHeight;
+            // canvasElement.style.height = videoHeight;
             videoElement.style.width = videoWidth;
             videoElement.style.height = videoHeight;
-            canvasElement.style.width = videoWidth;
+            // canvasElement.style.width = videoWidth;
             if (webcamResults) {
-              if (
-                webcamResults.landmarks &&
-                webcamResults.gestures.length > 0
-              ) {
-                for (const landmarks of webcamResults.landmarks) {
-                  drawingUtils.drawConnectors(
-                    landmarks,
-                    GestureRecognizer.HAND_CONNECTIONS,
-                    {
-                      color: "#00FF00",
-                      lineWidth: 5,
-                    }
-                  );
-                  drawingUtils.drawLandmarks(landmarks, {
-                    color: "#FF0000",
-                    lineWidth: 2,
-                  });
-                }
-              }
-
-              canvasCtx.restore();
-
               if (webcamResults.gestures) {
+                // if (
+                //   webcamResults.landmarks &&
+                //   webcamResults.gestures.length > 0
+                // ) {
+                //   for (const landmarks of webcamResults.landmarks) {
+                //     drawingUtils.drawConnectors(
+                //       landmarks,
+                //       GestureRecognizer.HAND_CONNECTIONS,
+                //       {
+                //         color: "#00FF00",
+                //         lineWidth: 5,
+                //       }
+                //     );
+                //     drawingUtils.drawLandmarks(landmarks, {
+                //       color: "#FF0000",
+                //       lineWidth: 2,
+                //     });
+                //   }
+                // }
+
+                // canvasCtx.restore();
+
                 if (
                   webcamResults.gestures.length > 0 &&
                   webcamResults.handedness.length > 0
@@ -137,16 +141,22 @@ const Gesture: React.FC = () => {
                   gestureOutput.style.width = videoWidth;
 
                   const categoryName =
-                    webcamResults.gestures[0][0]?.categoryName || "Unknown";
-                  const categoryScore = Number(
-                    webcamResults.gestures[0][0]?.score * 100 || 0
-                  ).toFixed(2);
-                  const handedness =
-                    webcamResults.handedness[0][0]?.displayName || "Unknown";
+                    webcamResults.gestures[0][0].categoryName || "none";
+                  const categoryScore: number = parseFloat(
+                    Number(webcamResults.gestures[0][0].score * 100).toFixed(2)
+                  );
 
-                  gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore} %\n Handedness: ${handedness}`;
+                  setCategoryNameState(categoryName);
+                  setCategoryScoreState(categoryScore);
+
+                  // const handedness =
+                  //   webcamResults.handedness[0][0]?.displayName || "none";
+
+                  console.log(recognizedLetter);
+
+                  gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore}`;
                 } else {
-                  gestureOutput.style.display = "none";
+                  // gestureOutput.style.display = "none";
                 }
               }
             }
@@ -203,30 +213,77 @@ const Gesture: React.FC = () => {
     }
   };
 
+  function recognize() {
+    const recognizedTextHTML = document.getElementById("recognized-text");
+    const textChallengeHTML = document.getElementById("text-challenge");
+
+    if (categoryScoreState! >= 65) {
+      setRecognizedLetter(categoryNameState);
+    }
+
+    if (textChallenge.length > 0) {
+      const firstChallengeChar = textChallenge[0];
+
+      if (
+        recognizedLetter.toLowerCase() === firstChallengeChar.toLowerCase() ||
+        firstChallengeChar === "." ||
+        firstChallengeChar === " " ||
+        firstChallengeChar === ","
+      ) {
+        const recognizedTextInitial = recognizedText + firstChallengeChar;
+        setRecognizedText(recognizedTextInitial);
+        recognizedTextHTML!.innerText = recognizedTextInitial;
+
+        const textChallengeInitial = textChallenge.slice(1);
+        setTextChallenge(textChallengeInitial);
+        textChallengeHTML!.innerText = textChallengeInitial;
+      }
+    }
+  }
+
+  useEffect(() => {
+    let i = 0;
+    recognize();
+    console.log(i + 1);
+    i++;
+  }, [recognizedLetter, textChallenge, categoryNameState, categoryScoreState]);
+
   return (
-    <div>
-      <button
-        id="webcamButton"
-        onClick={async () => {
-          await enableWebcam();
-        }}
-      >
-        Enable Webcam
-      </button>
-
-      <Webcam
-        videoConstraints={videoConstraints}
-        audio={false}
-        ref={webcamRef}
-        className="z-10"
-        id="webcam"
-        width={videoWidth}
-        height={videoHeight}
-        autoPlay={isPlaying}
-      />
-
-      <canvas id="output_canvas" className="z-10" />
-      <div id="gesture_output" />
+    <div className="w-screen h-screen bg-gray-800 flex">
+      <div className="w-4/5 h-4/5 bg-yellow-100 m-auto">
+        <h3 className="w-full text-9xl font-bold text-center mt-20">
+          {recognizedLetter}
+        </h3>
+        <h3 className="w-full text-3xl font-bold text-center mt-20">
+          <span id="recognized-text"></span>
+          <span id="text-challenge" className="text-gray-400">
+            {textChallenge}
+          </span>
+        </h3>
+      </div>
+      <div className="absolute">
+        <button
+          id="webcamButton"
+          onClick={async () => {
+            await enableWebcam();
+          }}
+        >
+          Enable Webcam
+        </button>
+        <Webcam
+          videoConstraints={videoConstraints}
+          audio={false}
+          ref={webcamRef}
+          className="z-10"
+          id="webcam"
+          width={videoWidth}
+          height={videoHeight}
+          autoPlay={isPlaying}
+          style={{ opacity: 0 }}
+        />
+        <canvas id="output_canvas" className="z-10" style={{ opacity: 0 }} />
+        <div id="gesture_output" />
+      </div>
     </div>
   );
 };
