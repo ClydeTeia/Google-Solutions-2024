@@ -1,6 +1,26 @@
 import Image from "next/image";
+import {
+  createData,
+  readData,
+  updateData,
+  deleteData
+} from "@/firebase/crud";
 
 export default async function Home() {
+  // CRUD TESTS
+  
+  // await createData("code", {
+  //   name: "hihello",
+  //   new: "222"
+  // })
+
+  // await readData("code", "name", "hi");
+
+  // await updateData("code","name","hi",{
+  //   "ssk": "dsfdsfdfds"
+  // })
+
+  // await deleteData("code","new","222")
 
   return (
     <main className="p-2">
