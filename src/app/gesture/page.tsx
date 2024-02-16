@@ -54,7 +54,6 @@ const Gesture: React.FC = () => {
       5;
       setGestureRecognizer(recognizer);
     };
-    console.log("createGestureRecognizer");
 
     createGestureRecognizer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,8 +61,6 @@ const Gesture: React.FC = () => {
 
   let lastVideoTime = -1;
   let webcamResults: any = undefined;
-
-  // console.log("before predictWebcam");
 
   const PredictWebcam = async () => {
     if (webcamRef.current) {
@@ -91,73 +88,26 @@ const Gesture: React.FC = () => {
             // const canvasCtx = canvasElement.getContext(
             //   "2d"
             // ) as CanvasRenderingContext2D;
-            const gestureOutput = document.getElementById(
-              "gesture_output"
-            ) as HTMLElement;
 
-            // canvasCtx.save();
-            // canvasCtx.clearRect(
-            //   0,
-            //   0,
-            //   canvasElement.width,
-            //   canvasElement.height
-            // );
-
-            // const drawingUtils = new DrawingUtils(canvasCtx);
-
-            // canvasElement.style.height = videoHeight;
             videoElement.style.width = videoWidth;
             videoElement.style.height = videoHeight;
             // canvasElement.style.width = videoWidth;
-            if (webcamResults) {
-              if (webcamResults.gestures) {
-                // if (
-                //   webcamResults.landmarks &&
-                //   webcamResults.gestures.length > 0
-                // ) {
-                //   for (const landmarks of webcamResults.landmarks) {
-                //     drawingUtils.drawConnectors(
-                //       landmarks,
-                //       GestureRecognizer.HAND_CONNECTIONS,
-                //       {
-                //         color: "#00FF00",
-                //         lineWidth: 5,
-                //       }
-                //     );
-                //     drawingUtils.drawLandmarks(landmarks, {
-                //       color: "#FF0000",
-                //       lineWidth: 2,
-                //     });
-                //   }
-                // }
+            if (webcamResults && webcamResults.gestures) {
+              if (
+                webcamResults.gestures.length > 0 &&
+                webcamResults.handedness.length > 0
+              ) {
+                const categoryName =
+                  webcamResults.gestures[0][0].categoryName || "none";
+                const categoryScore: number = parseFloat(
+                  Number(webcamResults.gestures[0][0].score * 100).toFixed(2)
+                );
 
-                // canvasCtx.restore();
+                setCategoryNameState(categoryName);
+                setCategoryScoreState(categoryScore);
+                setRecognizedLetter(categoryName);
 
-                if (
-                  webcamResults.gestures.length > 0 &&
-                  webcamResults.handedness.length > 0
-                ) {
-                  gestureOutput.style.display = "block";
-                  gestureOutput.style.width = videoWidth;
-
-                  const categoryName =
-                    webcamResults.gestures[0][0].categoryName || "none";
-                  const categoryScore: number = parseFloat(
-                    Number(webcamResults.gestures[0][0].score * 100).toFixed(2)
-                  );
-
-                  setCategoryNameState(categoryName);
-                  setCategoryScoreState(categoryScore);
-
-                  // const handedness =
-                  //   webcamResults.handedness[0][0]?.displayName || "none";
-
-                  console.log(recognizedLetter);
-
-                  gestureOutput.innerText = `GestureRecognizer: ${categoryName}\n Confidence: ${categoryScore}`;
-                } else {
-                  // gestureOutput.style.display = "none";
-                }
+                console.log(recognizedLetter);
               }
             }
 
@@ -214,13 +164,6 @@ const Gesture: React.FC = () => {
   };
 
   function recognize() {
-    const recognizedTextHTML = document.getElementById("recognized-text");
-    const textChallengeHTML = document.getElementById("text-challenge");
-
-    if (categoryScoreState! >= 65) {
-      setRecognizedLetter(categoryNameState);
-    }
-
     if (textChallenge.length > 0) {
       const firstChallengeChar = textChallenge[0];
 
@@ -232,11 +175,9 @@ const Gesture: React.FC = () => {
       ) {
         const recognizedTextInitial = recognizedText + firstChallengeChar;
         setRecognizedText(recognizedTextInitial);
-        recognizedTextHTML!.innerText = recognizedTextInitial;
 
         const textChallengeInitial = textChallenge.slice(1);
         setTextChallenge(textChallengeInitial);
-        textChallengeHTML!.innerText = textChallengeInitial;
       }
     }
   }
@@ -246,16 +187,16 @@ const Gesture: React.FC = () => {
     recognize();
     console.log(i + 1);
     i++;
-  }, [recognizedLetter, textChallenge, categoryNameState, categoryScoreState]);
+  }, [recognizedLetter, categoryNameState, categoryScoreState]);
 
   return (
     <div className="w-screen h-screen bg-gray-800 flex">
-      <div className="w-4/5 h-4/5 bg-yellow-100 m-auto">
+      <div className="w-4/5 h-4/5 m-auto">
         <h3 className="w-full text-9xl font-bold text-center mt-20">
           {recognizedLetter}
         </h3>
         <h3 className="w-full text-3xl font-bold text-center mt-20">
-          <span id="recognized-text"></span>
+          <span id="recognized-text">{recognizedText}</span>
           <span id="text-challenge" className="text-gray-400">
             {textChallenge}
           </span>
@@ -267,6 +208,7 @@ const Gesture: React.FC = () => {
           onClick={async () => {
             await enableWebcam();
           }}
+          
         >
           Enable Webcam
         </button>
@@ -282,7 +224,6 @@ const Gesture: React.FC = () => {
           style={{ opacity: 0 }}
         />
         <canvas id="output_canvas" className="z-10" style={{ opacity: 0 }} />
-        <div id="gesture_output" />
       </div>
     </div>
   );
