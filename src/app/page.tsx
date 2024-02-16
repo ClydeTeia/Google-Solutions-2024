@@ -1,10 +1,5 @@
 import Image from "next/image";
-import {
-  createData,
-  readData,
-  updateData,
-  deleteData
-} from "@/firebase/crud";
+import { createData, readData, updateData, deleteData } from "@/firebase/crud";
 import { user } from "@/firebase/config";
 import { onAuthStateChanged } from "firebase/auth";
 
@@ -52,9 +47,7 @@ export default function Home() {
     <main className="p-2">
       <h1>Home Page</h1>
       <div></div>
-      <div>
-
-      </div>
+      <div></div>
     </main>
   );
 }
