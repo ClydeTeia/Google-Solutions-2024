@@ -208,6 +208,7 @@ const Gesture: React.FC = () => {
           onClick={async () => {
             await enableWebcam();
           }}
+          
         >
           Enable Webcam
         </button>
