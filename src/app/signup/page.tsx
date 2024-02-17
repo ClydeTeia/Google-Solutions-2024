@@ -63,7 +63,7 @@ export default function SignupPage() {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input className="min-w-3" placeholder="Enter email" {...field} />
+                  <Input className="min-w-3" placeholder="Enter username" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
