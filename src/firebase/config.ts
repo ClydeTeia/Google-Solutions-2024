@@ -1,9 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: process.env.apiKey,
+  apiKey: process.env.NEXT_PUBLIC_apiKey,
   authDomain: process.env.authDomain,
   projectId: process.env.projectId,
   storageBucket: process.env.storageBucket,
@@ -18,5 +18,15 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 // Initialize Firebase Authentication and get a reference to the service
-const auth = getAuth(app);
+export const auth = getAuth(app);
 export const user = auth.currentUser;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    const uid = user.uid;
+    console.log("User UID:", uid);
+    console.log("welcome", user.displayName)
+  } else {
+    console.log("No user is signed in.");
+  }
+});
