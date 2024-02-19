@@ -1,7 +1,12 @@
-import React from "react";
+"use client"
 
-const page = () => {
-  return <div className="p-4">About Page</div>;
+import React from "react";
+import { UserAuth } from "../context/firebaseContext";
+
+export default function page () {
+  const {user} = UserAuth();
+  return (
+    <div className="p-4">hello {user?.displayName}</div>
+  );
 };
 
-export default page;

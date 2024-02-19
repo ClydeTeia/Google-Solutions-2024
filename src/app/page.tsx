@@ -2,7 +2,7 @@ import Image from "next/image";
 import { createData, readData, updateData, deleteData } from "@/firebase/crud";
 import { auth } from '@/firebase/config';
 import { onAuthStateChanged } from "firebase/auth";
-import { user } from "@/firebase/config";
+import { UserAuth } from './context/firebaseContext';
 
 export default function Home() {
   // CRUD TESTS
@@ -20,20 +20,11 @@ export default function Home() {
 
   // await deleteData("code","new","222")
   // const router = useRouter();
-
-  if (user) {
-    // The user object has basic properties such as display name, email, etc.
-    const displayName = user.displayName;
-    const email = user.email;
-    console.log("hello", displayName, email)
-  } else {
-    console.log("no user sad")
-  }
-
+  
   return (
     <main className="p-2">
       <h1>Home Page</h1>
-      <div></div>
+      <div>hello</div>
       <div></div>
     </main>
   );

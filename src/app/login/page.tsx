@@ -19,8 +19,21 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoginFormSchema } from '@/components/schema';
+import { UserAuth } from '../context/firebaseContext';
 
 export default function LoginPage() {
+  const { user, googleSignIn, logOut, emailSignIn } = UserAuth();
+  const router = useRouter();
+
+  const handleSignIn = async () => {
+    try {
+      await googleSignIn();
+      router.push("/")
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const form = useForm<z.infer<typeof LoginFormSchema>>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -29,22 +42,11 @@ export default function LoginPage() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof LoginFormSchema>) {
+  async function onSubmit(data: z.infer<typeof LoginFormSchema>) {
     console.log(data)
-    signInWithEmailAndPassword(auth, data.email, data.password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log(user)
-        router.push("/")
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage)
-      });
+    emailSignIn(data.email, data.password)
   }
 
-  const router = useRouter();
   return (
     <div className='text-sm h-screen flex flex-col items-center justify-center'>
       <h1 className='text-2xl mb-3'>Log in now!</h1>
@@ -85,7 +87,7 @@ export default function LoginPage() {
       <Button variant="link" onClick={() => router.push("/signup")}>
         Signup
       </Button>
-      <Button className="absolute bottom-3" variant="link" onClick={() => console.log('google')}>
+      <Button className="absolute bottom-3" variant="link" onClick={handleSignIn}>
         Log In with Google
       </Button>
     </div>

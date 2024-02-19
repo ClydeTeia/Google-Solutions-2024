@@ -2,8 +2,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { auth } from '@/firebase/config';
-
+import { auth, db } from '@/firebase/config';
+import { doc, setDoc } from "firebase/firestore"; 
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 
 import { zodResolver } from "@hookform/resolvers/zod"
