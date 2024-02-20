@@ -43,8 +43,15 @@ export default function LoginPage() {
   })
 
   async function onSubmit(data: z.infer<typeof LoginFormSchema>) {
-    console.log(data)
-    emailSignIn(data.email, data.password)
+    try {
+      console.log(data);
+      await emailSignIn(data.email, data.password);
+      router.push("/");
+    } catch (error) {
+      // Handle the authentication error
+      console.error("Authentication failed:", (error as Error).message);
+      // You can also set an error state in your form for user feedback if needed
+    }
   }
 
   return (
@@ -83,12 +90,12 @@ export default function LoginPage() {
           </div>
         </form>
       </Form>
-      <h1 className='mt-6'>Don	&apos;t have an account yet?</h1>
+      <h1 className='mt-6 -mb-2'>Already have an account?</h1>
       <Button variant="link" onClick={() => router.push("/signup")}>
         Signup
       </Button>
-      <Button className="absolute bottom-3" variant="link" onClick={handleSignIn}>
-        Log In with Google
+      <Button className="mt-2" variant="outline" onClick={handleSignIn}>
+        Log in with Google
       </Button>
     </div>
   )

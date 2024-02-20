@@ -7,6 +7,8 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
+  updateProfile,
+  createUserWithEmailAndPassword,
 } from "firebase/auth";
 import { auth } from "@/firebase/config";
 
@@ -16,6 +18,7 @@ import { User } from 'firebase/auth'; // Make sure to import the User type from 
 interface AuthContextValue {
   user: User | null;
   emailSignIn: (email: string, password: string) => void;
+  emailSignUp: (email: string, password: string, username: string) => void
   googleSignIn: () => void;
   logOut: () => void;
 }
@@ -24,6 +27,7 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   emailSignIn: () => { },
+  emailSignUp: () => { },
   googleSignIn: () => { },
   logOut: () => { },
 });
@@ -35,16 +39,42 @@ export const AuthContextProvider = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const emailSignIn = (email: string, password: string) => {
-    signInWithEmailAndPassword(auth, email, password)
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  const emailSignUp = async (email: string, password: string, username: string) => {
+    console.log('here')
+    await createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed in 
+        // Signed up 
         const user = userCredential.user;
-        console.log(user, "logged in")
+        updateProfile(user, {
+          displayName: username
+        })
+        console.log(user.displayName, 'has logged in')
       })
       .catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
+        console.error(errorCode, errorMessage)
+      });
+  }
+
+  const emailSignIn = async (email: string, password: string) => {
+    await signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed up 
+        const user = userCredential.user;
+        console.log(user.displayName, 'has logged in')
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        console.error(errorCode, errorMessage)
       });
   }
 
@@ -58,15 +88,8 @@ export const AuthContextProvider = ({
     console.log(user?.displayName, "has logged out")
   };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, [user]);
-
   return (
-    <AuthContext.Provider value={{ user, emailSignIn, googleSignIn, logOut }}>
+    <AuthContext.Provider value={{ user, emailSignIn, emailSignUp, googleSignIn, logOut }}>
       {children}
     </AuthContext.Provider>
   );

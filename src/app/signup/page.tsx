@@ -19,8 +19,21 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RegisterFormSchema } from '@/components/schema';
+import { UserAuth } from '../context/firebaseContext';
 
 export default function SignupPage() {
+  const { user, googleSignIn, logOut, emailSignUp } = UserAuth();
+  const router = useRouter();
+
+  const handleSignIn = async () => {
+    try {
+      googleSignIn();
+      router.push("/")
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const form = useForm<z.infer<typeof RegisterFormSchema>>({
     resolver: zodResolver(RegisterFormSchema),
     defaultValues: {
@@ -30,26 +43,17 @@ export default function SignupPage() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof RegisterFormSchema>) {
-    console.log(data)
-    createUserWithEmailAndPassword(auth, data.email, data.password)
-      .then((userCredential) => {
-        // Signed up 
-        const user = userCredential.user;
-        updateProfile(user, {
-          displayName: data.username
-        })
-        console.log(user)
-        router.push("/login")
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage)
-      });
+  async function onSubmit(data: z.infer<typeof RegisterFormSchema>) {
+    try {
+      console.log(data);
+      await emailSignUp(data.email, data.password, data.username);
+      router.push("/");
+    } catch (error) {
+      // Handle the authentication error
+      console.error("Authentication failed:", (error as Error).message);
+      // You can also set an error state in your form for user feedback if needed
+    }
   }
-
-  const router = useRouter();
 
   return (
     <div className='text-sm h-screen flex flex-col items-center justify-center'>
@@ -100,11 +104,11 @@ export default function SignupPage() {
           </div>
         </form>
       </Form>
-      <h1 className='mt-6'>Already have an account?</h1>
+      <h1 className='mt-6 -mb-2'>Already have an account?</h1>
       <Button variant="link" onClick={() => router.push("/login")}>
         Login
       </Button>
-      <Button className="absolute bottom-3" variant="link" onClick={() => console.log('google')}>
+      <Button className="mt-2" variant="outline" onClick={handleSignIn}>
         Sign Up with Google
       </Button>
     </div>

@@ -27,7 +27,7 @@ export default function Navbar() {
       </ul>
       {user ?
         <ul className="flex">
-          <li className="p-2 cursor-pointer">
+          <li className="p-2">
             Hello {user.displayName}
           </li>
           <Button variant={"destructive"} onClick={() => {
