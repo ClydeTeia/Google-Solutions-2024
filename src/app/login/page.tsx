@@ -48,9 +48,7 @@ export default function LoginPage() {
       await emailSignIn(data.email, data.password);
       router.push("/");
     } catch (error) {
-      // Handle the authentication error
-      console.error("Authentication failed:", (error as Error).message);
-      // You can also set an error state in your form for user feedback if needed
+      console.error(error)
     }
   }
 

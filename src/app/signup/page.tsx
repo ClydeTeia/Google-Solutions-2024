@@ -27,7 +27,7 @@ export default function SignupPage() {
 
   const handleSignIn = async () => {
     try {
-      googleSignIn();
+      await googleSignIn();
       router.push("/")
     } catch (error) {
       console.log(error);
@@ -49,9 +49,7 @@ export default function SignupPage() {
       await emailSignUp(data.email, data.password, data.username);
       router.push("/");
     } catch (error) {
-      // Handle the authentication error
-      console.error("Authentication failed:", (error as Error).message);
-      // You can also set an error state in your form for user feedback if needed
+      console.error(error)
     }
   }
 

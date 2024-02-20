@@ -39,20 +39,12 @@ export const AuthContextProvider = ({
 }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-    return () => unsubscribe();
-  }, [user]);
-
   const emailSignUp = async (email: string, password: string, username: string) => {
-    console.log('here')
     await createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
+      .then(async (userCredential) => {
         // Signed up 
         const user = userCredential.user;
-        updateProfile(user, {
+        await updateProfile(user, {
           displayName: username
         })
         console.log(user.displayName, 'has logged in')
@@ -66,16 +58,6 @@ export const AuthContextProvider = ({
 
   const emailSignIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        // Signed up 
-        const user = userCredential.user;
-        console.log(user.displayName, 'has logged in')
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage)
-      });
   }
 
   const googleSignIn = async () => {
@@ -87,6 +69,13 @@ export const AuthContextProvider = ({
     signOut(auth);
     console.log(user?.displayName, "has logged out")
   };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, [user]);
 
   return (
     <AuthContext.Provider value={{ user, emailSignIn, emailSignUp, googleSignIn, logOut }}>
