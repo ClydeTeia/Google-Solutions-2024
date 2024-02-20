@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/firebase/config';
@@ -22,15 +22,18 @@ import { LoginFormSchema } from '@/components/schema';
 import { UserAuth } from '../context/firebaseContext';
 
 export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null);
   const { user, googleSignIn, logOut, emailSignIn } = UserAuth();
   const router = useRouter();
+
+  if (user) router.push("/")
 
   const handleSignIn = async () => {
     try {
       await googleSignIn();
       router.push("/")
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -48,6 +51,11 @@ export default function LoginPage() {
       await emailSignIn(data.email, data.password);
       router.push("/");
     } catch (error) {
+      form.reset({
+        email: "", // Reset the email field
+        password: "", // Reset the password field
+      });
+      setError("Wrong credentials, try again")
       console.error(error)
     }
   }
@@ -83,8 +91,13 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
-          <div className="flex justify-center">
-            <Button type="submit">Submit</Button>
+          <div className="flex text-center flex-col">
+            <Button type="submit" className='w-24 m-auto'>Submit</Button>
+            {error &&
+            <div className='text-red-600 text-base mt-1'>
+              {error}
+            </div>
+            }
           </div>
         </form>
       </Form>

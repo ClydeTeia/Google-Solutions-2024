@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { auth, db } from '@/firebase/config';
@@ -24,6 +24,8 @@ import { UserAuth } from '../context/firebaseContext';
 export default function SignupPage() {
   const { user, googleSignIn, logOut, emailSignUp } = UserAuth();
   const router = useRouter();
+
+  if (user) router.push("/")
 
   const handleSignIn = async () => {
     try {

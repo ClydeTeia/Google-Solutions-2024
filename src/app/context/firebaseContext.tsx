@@ -49,11 +49,6 @@ export const AuthContextProvider = ({
         })
         console.log(user.displayName, 'has logged in')
       })
-      .catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        console.error(errorCode, errorMessage)
-      });
   }
 
   const emailSignIn = async (email: string, password: string) => {
