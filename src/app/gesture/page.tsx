@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Webcam from "react-webcam";
-
 import {
   GestureRecognizer,
   FilesetResolver,
   DrawingUtils,
 } from "@mediapipe/tasks-vision";
+import Webcam from "react-webcam";
+import { asl_vocabulary } from "../../../utils/samples/typeraceWords";
 
 const Gesture: React.FC = () => {
   type RunningMode = "IMAGE" | "VIDEO";
@@ -30,9 +30,10 @@ const Gesture: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [recognizedLetter, setRecognizedLetter] = useState<string>("");
   const [recognizedText, setRecognizedText] = useState<string>("");
-  const [textChallenge, setTextChallenge] = useState<string>(
-    "She sell seashells on the sea shore"
-  );
+  const [textChallenge, setTextChallenge] = useState<string>("");
+  const aslVocabulary: string[] = asl_vocabulary;
+
+  // "She sell seashells on the sea shore"
 
   let animationFrameId: number;
 
@@ -102,10 +103,11 @@ const Gesture: React.FC = () => {
                 const categoryScore: number = parseFloat(
                   Number(webcamResults.gestures[0][0].score * 100).toFixed(2)
                 );
-
-                setCategoryNameState(categoryName);
-                setCategoryScoreState(categoryScore);
-                setRecognizedLetter(categoryName);
+                if (categoryScore > 40) {
+                  setCategoryNameState(categoryName);
+                  setCategoryScoreState(categoryScore);
+                  setRecognizedLetter(categoryName);
+                }
 
                 console.log(recognizedLetter);
               }
@@ -115,6 +117,7 @@ const Gesture: React.FC = () => {
               animationFrameId = requestAnimationFrame(animate);
             }
           };
+
           animationFrameId = requestAnimationFrame(animate);
         }
       }
@@ -164,30 +167,56 @@ const Gesture: React.FC = () => {
   };
 
   function recognize() {
+    if (textChallenge.length === 0) {
+      setRecognizedText("");
+      setTextChallenge(randomWord());
+      console.log("textChallenge", textChallenge);
+    }
+
     if (textChallenge.length > 0) {
       const firstChallengeChar = textChallenge[0];
-
       if (
         recognizedLetter.toLowerCase() === firstChallengeChar.toLowerCase() ||
+        ((recognizedLetter.toLowerCase() === "m" ||
+          recognizedLetter.toLowerCase() === "n") &&
+          (firstChallengeChar === "m" || firstChallengeChar === "n")) ||
         firstChallengeChar === "." ||
         firstChallengeChar === " " ||
-        firstChallengeChar === ","
+        firstChallengeChar === "," ||
+        firstChallengeChar === "!" ||
+        firstChallengeChar === "?" ||
+        firstChallengeChar === "-"
       ) {
-        const recognizedTextInitial = recognizedText + firstChallengeChar;
+        const recognizedTextInitial =
+          recognizedText +
+          (firstChallengeChar === firstChallengeChar.toUpperCase()
+            ? firstChallengeChar
+            : firstChallengeChar.toLowerCase());
         setRecognizedText(recognizedTextInitial);
-
         const textChallengeInitial = textChallenge.slice(1);
         setTextChallenge(textChallengeInitial);
+        // const nextLetter = textChallengeInitial[0];
+        // setRecognizedLetter(nextLetter);
+        console.log("recognizedTextInitial", recognizedTextInitial);
+        console.log("textChallengeInitial", textChallengeInitial);
       }
     }
   }
 
+  function randomWord() {
+    const randomIndex = Math.floor(Math.random() * aslVocabulary.length);
+    return aslVocabulary[randomIndex];
+  }
+
   useEffect(() => {
-    let i = 0;
+    randomWord();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     recognize();
-    console.log(i + 1);
-    i++;
-  }, [recognizedLetter, categoryNameState, categoryScoreState]);
+    console.log("-".repeat(10));
+  }, [recognizedLetter, recognizedLetter, textChallenge]);
 
   return (
     <div className="w-screen h-screen bg-gray-800 flex">
@@ -208,7 +237,6 @@ const Gesture: React.FC = () => {
           onClick={async () => {
             await enableWebcam();
           }}
-          
         >
           Enable Webcam
         </button>
