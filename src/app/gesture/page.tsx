@@ -219,19 +219,8 @@ const Gesture: React.FC = () => {
   }, [recognizedLetter, recognizedLetter, textChallenge]);
 
   return (
-    <div className="w-screen h-screen bg-gray-800 flex">
-      <div className="w-4/5 h-4/5 m-auto">
-        <h3 className="w-full text-9xl font-bold text-center mt-20">
-          {recognizedLetter}
-        </h3>
-        <h3 className="w-full text-3xl font-bold text-center mt-20">
-          <span id="recognized-text">{recognizedText}</span>
-          <span id="text-challenge" className="text-gray-400">
-            {textChallenge}
-          </span>
-        </h3>
-      </div>
-      <div className="absolute">
+    <div className="w-screen h-screen bg-gray-800 flex flex-col items-center">
+      <div className="w-72 h-60">
         <button
           id="webcamButton"
           onClick={async () => {
@@ -244,14 +233,23 @@ const Gesture: React.FC = () => {
           videoConstraints={videoConstraints}
           audio={false}
           ref={webcamRef}
-          className="z-10"
+          className="z-10 aspect-video"
           id="webcam"
           width={videoWidth}
           height={videoHeight}
           autoPlay={isPlaying}
-          style={{ opacity: 0 }}
         />
-        <canvas id="output_canvas" className="z-10" style={{ opacity: 0 }} />
+      </div>
+      <div className="w-4/5 h-4/5 m-auto">
+        <h3 className="w-full text-9xl font-bold text-center">
+          {recognizedLetter}
+        </h3>
+        <h3 className="w-full text-3xl font-bold text-center mt-6">
+          <span id="recognized-text">{recognizedText}</span>
+          <span id="text-challenge" className="text-gray-400">
+            {textChallenge}
+          </span>
+        </h3>
       </div>
     </div>
   );
