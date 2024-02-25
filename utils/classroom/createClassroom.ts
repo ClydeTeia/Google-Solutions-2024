@@ -1,4 +1,4 @@
-import { db } from "@/firebase/config";
+import { db } from "../../src/firebase/config";
 import { addDoc, collection } from "firebase/firestore";
 
 type ClassroomData = {

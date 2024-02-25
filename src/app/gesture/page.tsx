@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
 import Webcam from "react-webcam";
-
-import {
-  GestureRecognizer,
-  FilesetResolver,
-  DrawingUtils,
-} from "@mediapipe/tasks-vision";
+import { asl_vocabulary } from "../../../utils/samples/typeraceWords";
 
 const Gesture: React.FC = () => {
   type RunningMode = "IMAGE" | "VIDEO";
@@ -30,9 +26,8 @@ const Gesture: React.FC = () => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [recognizedLetter, setRecognizedLetter] = useState<string>("");
   const [recognizedText, setRecognizedText] = useState<string>("");
-  const [textChallenge, setTextChallenge] = useState<string>(
-    "She sell seashells on the sea shore"
-  );
+  const [textChallenge, setTextChallenge] = useState<string>("");
+  const aslVocabulary: string[] = asl_vocabulary;
 
   let animationFrameId: number;
 
@@ -82,16 +77,8 @@ const Gesture: React.FC = () => {
               );
             }
 
-            // const canvasElement = document.getElementById(
-            //   "output_canvas"
-            // ) as HTMLCanvasElement;
-            // const canvasCtx = canvasElement.getContext(
-            //   "2d"
-            // ) as CanvasRenderingContext2D;
-
             videoElement.style.width = videoWidth;
             videoElement.style.height = videoHeight;
-            // canvasElement.style.width = videoWidth;
             if (webcamResults && webcamResults.gestures) {
               if (
                 webcamResults.gestures.length > 0 &&
@@ -102,10 +89,11 @@ const Gesture: React.FC = () => {
                 const categoryScore: number = parseFloat(
                   Number(webcamResults.gestures[0][0].score * 100).toFixed(2)
                 );
-
-                setCategoryNameState(categoryName);
-                setCategoryScoreState(categoryScore);
-                setRecognizedLetter(categoryName);
+                if (categoryScore > 40) {
+                  setCategoryNameState(categoryName);
+                  setCategoryScoreState(categoryScore);
+                  setRecognizedLetter(categoryName);
+                }
 
                 console.log(recognizedLetter);
               }
@@ -115,13 +103,14 @@ const Gesture: React.FC = () => {
               animationFrameId = requestAnimationFrame(animate);
             }
           };
+
           animationFrameId = requestAnimationFrame(animate);
         }
       }
     }
   };
 
-  // for future purpose, this code is to avoid memory leaks
+  // for future purpose, this code is to stop the webcam
   const stopAnimation = () => {
     cancelAnimationFrame(animationFrameId);
   };
@@ -139,11 +128,7 @@ const Gesture: React.FC = () => {
     const enableWebcamButton = document.getElementById("webcamButton");
 
     if (enableWebcamButton) {
-      if (webcamRunning) {
-        enableWebcamButton.innerText = "ENABLE PREDICTIONS";
-      } else {
-        enableWebcamButton.innerText = "DISABLE PREDICTIONS";
-      }
+      enableWebcamButton.innerText = "Camera enabled";
     }
 
     const constraints = {
@@ -164,51 +149,64 @@ const Gesture: React.FC = () => {
   };
 
   function recognize() {
+    if (textChallenge.length === 0) {
+      setRecognizedText("");
+      setTextChallenge(randomWord());
+      console.log("textChallenge", textChallenge);
+    }
+
     if (textChallenge.length > 0) {
       const firstChallengeChar = textChallenge[0];
-
       if (
         recognizedLetter.toLowerCase() === firstChallengeChar.toLowerCase() ||
+        ((recognizedLetter.toLowerCase() === "m" ||
+          recognizedLetter.toLowerCase() === "n") &&
+          (firstChallengeChar === "m" || firstChallengeChar === "n")) ||
         firstChallengeChar === "." ||
         firstChallengeChar === " " ||
-        firstChallengeChar === ","
+        firstChallengeChar === "," ||
+        firstChallengeChar === "!" ||
+        firstChallengeChar === "?" ||
+        firstChallengeChar === "-"
       ) {
-        const recognizedTextInitial = recognizedText + firstChallengeChar;
+        const recognizedTextInitial =
+          recognizedText +
+          (firstChallengeChar === firstChallengeChar.toUpperCase()
+            ? firstChallengeChar
+            : firstChallengeChar.toLowerCase());
         setRecognizedText(recognizedTextInitial);
-
         const textChallengeInitial = textChallenge.slice(1);
         setTextChallenge(textChallengeInitial);
+
+        console.log("recognizedTextInitial", recognizedTextInitial);
+        console.log("textChallengeInitial", textChallengeInitial);
       }
     }
   }
 
+  function randomWord() {
+    const randomIndex = Math.floor(Math.random() * aslVocabulary.length);
+    return aslVocabulary[randomIndex];
+  }
+
   useEffect(() => {
-    let i = 0;
+    randomWord();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     recognize();
-    console.log(i + 1);
-    i++;
-  }, [recognizedLetter, categoryNameState, categoryScoreState]);
+    console.log("-".repeat(10));
+  }, [recognizedLetter, recognizedLetter, textChallenge]);
 
   return (
-    <div className="w-screen h-screen bg-gray-800 flex">
-      <div className="w-4/5 h-4/5 m-auto">
-        <h3 className="w-full text-9xl font-bold text-center mt-20">
-          {recognizedLetter}
-        </h3>
-        <h3 className="w-full text-3xl font-bold text-center mt-20">
-          <span id="recognized-text">{recognizedText}</span>
-          <span id="text-challenge" className="text-gray-400">
-            {textChallenge}
-          </span>
-        </h3>
-      </div>
-      <div className="absolute">
+    <div className="w-screen h-screen bg-gray-800 flex flex-col items-center">
+      <div className="w-72 h-60">
         <button
           id="webcamButton"
           onClick={async () => {
             await enableWebcam();
           }}
-          
         >
           Enable Webcam
         </button>
@@ -216,14 +214,23 @@ const Gesture: React.FC = () => {
           videoConstraints={videoConstraints}
           audio={false}
           ref={webcamRef}
-          className="z-10"
+          className="z-10 aspect-video"
           id="webcam"
           width={videoWidth}
           height={videoHeight}
           autoPlay={isPlaying}
-          style={{ opacity: 0 }}
         />
-        <canvas id="output_canvas" className="z-10" style={{ opacity: 0 }} />
+      </div>
+      <div className="w-4/5 h-4/5 m-auto">
+        <h3 className="w-full text-7xl font-bold text-center">
+          {recognizedLetter}
+        </h3>
+        <h3 className="w-full text-3xl font-bold text-center mt-6">
+          <span id="recognized-text">{recognizedText}</span>
+          <span id="text-challenge" className="text-gray-400">
+            {textChallenge}
+          </span>
+        </h3>
       </div>
     </div>
   );
