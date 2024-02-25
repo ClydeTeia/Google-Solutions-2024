@@ -128,11 +128,7 @@ const Gesture: React.FC = () => {
     const enableWebcamButton = document.getElementById("webcamButton");
 
     if (enableWebcamButton) {
-      if (webcamRunning) {
-        enableWebcamButton.innerText = "ENABLE PREDICTIONS";
-      } else {
-        enableWebcamButton.innerText = "DISABLE PREDICTIONS";
-      }
+      enableWebcamButton.innerText = "Camera enabled";
     }
 
     const constraints = {
@@ -226,7 +222,7 @@ const Gesture: React.FC = () => {
         />
       </div>
       <div className="w-4/5 h-4/5 m-auto">
-        <h3 className="w-full text-9xl font-bold text-center">
+        <h3 className="w-full text-7xl font-bold text-center">
           {recognizedLetter}
         </h3>
         <h3 className="w-full text-3xl font-bold text-center mt-6">
