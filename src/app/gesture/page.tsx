@@ -1,11 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import {
-  GestureRecognizer,
-  FilesetResolver,
-  DrawingUtils,
-} from "@mediapipe/tasks-vision";
+import { GestureRecognizer, FilesetResolver } from "@mediapipe/tasks-vision";
 import Webcam from "react-webcam";
 import { asl_vocabulary } from "../../../utils/samples/typeraceWords";
 
@@ -32,8 +28,6 @@ const Gesture: React.FC = () => {
   const [recognizedText, setRecognizedText] = useState<string>("");
   const [textChallenge, setTextChallenge] = useState<string>("");
   const aslVocabulary: string[] = asl_vocabulary;
-
-  // "She sell seashells on the sea shore"
 
   let animationFrameId: number;
 
@@ -83,16 +77,8 @@ const Gesture: React.FC = () => {
               );
             }
 
-            // const canvasElement = document.getElementById(
-            //   "output_canvas"
-            // ) as HTMLCanvasElement;
-            // const canvasCtx = canvasElement.getContext(
-            //   "2d"
-            // ) as CanvasRenderingContext2D;
-
             videoElement.style.width = videoWidth;
             videoElement.style.height = videoHeight;
-            // canvasElement.style.width = videoWidth;
             if (webcamResults && webcamResults.gestures) {
               if (
                 webcamResults.gestures.length > 0 &&
@@ -124,7 +110,7 @@ const Gesture: React.FC = () => {
     }
   };
 
-  // for future purpose, this code is to avoid memory leaks
+  // for future purpose, this code is to stop the webcam
   const stopAnimation = () => {
     cancelAnimationFrame(animationFrameId);
   };
@@ -195,8 +181,7 @@ const Gesture: React.FC = () => {
         setRecognizedText(recognizedTextInitial);
         const textChallengeInitial = textChallenge.slice(1);
         setTextChallenge(textChallengeInitial);
-        // const nextLetter = textChallengeInitial[0];
-        // setRecognizedLetter(nextLetter);
+
         console.log("recognizedTextInitial", recognizedTextInitial);
         console.log("textChallengeInitial", textChallengeInitial);
       }
